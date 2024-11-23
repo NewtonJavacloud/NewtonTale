@@ -3,19 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embedded YouTube Video</title>
+    <title>Looping YouTube Video with Replay Details</title>
+    <style>
+        #replay-list {
+            margin-top: 20px;
+        }
+        .replay-item {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 <body>
     <h1>Looping YouTube Video</h1>
+    <p>Replays: <span id="replay-counter">0</span></p>
     <iframe 
+        id="youtube-video" 
         width="1246" 
         height="526" 
-        src="https://www.youtube.com/embed/qVkp2-wj8kk?autoplay=1&loop=1&playlist=qVkp2-wj8kk&mute=1" 
+        src="https://www.youtube.com/embed/qVkp2-wj8kk?enablejsapi=1&autoplay=1&mute=1" 
         title="Avatarpurusha Part 1 | Kannada Fantasy, Thriller" 
         frameborder="0" 
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        referrerpolicy="strict-origin-when-cross-origin" 
         allowfullscreen>
     </iframe>
+
+    <div id="replay-list">
+        <h2>Replay Details</h2>
+    </div>
+
+    <script>
+        // Load YouTube Player API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+        var replayCount = 0;
+
+        // Initialize YouTube Player
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-video', {
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // Start video at 2x speed when ready
+        function onPlayerReady(event) {
+            player.setPlaybackRate(2); // Set speed to 2x
+            event.target.playVideo();
+        }
+
+        // Increment counter and log replay details
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                replayCount++;
+                document.getElementById('replay-counter').textContent = replayCount;
+
+                // Add a replay entry
+                const replayList = document.getElementById('replay-list');
+                const replayItem = document.createElement('div');
+                replayItem.className = 'replay-item';
+                replayItem.id = `replay-${replayCount}`;
+                replayItem.textContent = `Replay ${replayCount}: Happened at ${new Date().toLocaleTimeString()}`;
+                replayList.appendChild(replayItem);
+
+                player.seekTo(0); // Restart the video
+                player.playVideo();
+            }
+        }
+    </script>
 </body>
 </html>
